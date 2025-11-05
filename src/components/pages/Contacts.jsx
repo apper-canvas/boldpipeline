@@ -1,23 +1,26 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import ApperIcon from "@/components/ApperIcon";
-import Button from "@/components/atoms/Button";
-import SearchBar from "@/components/molecules/SearchBar";
-import ContactRow from "@/components/molecules/ContactRow";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
-import Empty from "@/components/ui/Empty";
 import { contactService } from "@/services/api/contactService";
 import { dealService } from "@/services/api/dealService";
+import ApperIcon from "@/components/ApperIcon";
+import Button from "@/components/atoms/Button";
+import Deals from "@/components/pages/Deals";
+import QuickAddModal from "@/components/organisms/QuickAddModal";
+import ContactRow from "@/components/molecules/ContactRow";
+import SearchBar from "@/components/molecules/SearchBar";
+import Error from "@/components/ui/Error";
+import Empty from "@/components/ui/Empty";
+import Loading from "@/components/ui/Loading";
 
 const Contacts = () => {
-  const [contacts, setContacts] = useState([]);
+const [contacts, setContacts] = useState([]);
   const [deals, setDeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -120,7 +123,7 @@ const Contacts = () => {
           <h1 className="text-2xl font-bold gradient-text">Contacts</h1>
           <p className="text-secondary mt-1">Manage your customer relationships</p>
         </div>
-        <Button>
+<Button onClick={() => setIsModalOpen(true)}>
           <ApperIcon name="Plus" className="w-4 h-4" />
           Add Contact
         </Button>
@@ -233,11 +236,20 @@ const Contacts = () => {
         </div>
       </motion.div>
       
-      {displayContacts.length > 0 && (
+{displayContacts.length > 0 && (
         <div className="flex items-center justify-between text-sm text-secondary">
           <p>Showing {displayContacts.length} of {contacts.length} contacts</p>
         </div>
       )}
+
+<QuickAddModal 
+        isOpen={isModalOpen} 
+        onClose={() => {
+          setIsModalOpen(false);
+          // Refresh contacts after modal closes to show newly added contacts
+          loadData();
+        }} 
+      />
     </div>
   );
 };
