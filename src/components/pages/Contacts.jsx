@@ -47,9 +47,9 @@ const [contacts, setContacts] = useState([]);
 
   const enrichContactsWithDeals = (contacts, deals) => {
     return contacts.map(contact => {
-      const contactDeals = deals.filter(deal => deal.contactId === contact.Id);
-      const activeDeals = contactDeals.filter(deal => !["Closed Won", "Closed Lost"].includes(deal.stage));
-      const totalValue = contactDeals.reduce((sum, deal) => sum + deal.value, 0);
+const contactDeals = deals.filter(deal => deal.contact_id_c === contact.Id);
+      const activeDeals = contactDeals.filter(deal => !["Closed Won", "Closed Lost"].includes(deal.stage_c));
+      const totalValue = contactDeals.reduce((sum, deal) => sum + (deal.value_c || 0), 0);
       
       return {
         ...contact,
@@ -66,9 +66,9 @@ const [contacts, setContacts] = useState([]);
     
     if (searchTerm) {
       filtered = filtered.filter(contact =>
-        contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contact.company.toLowerCase().includes(searchTerm.toLowerCase())
+(contact.name_c || contact.Name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (contact.email_c || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (contact.company_c || "").toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     

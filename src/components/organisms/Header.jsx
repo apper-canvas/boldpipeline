@@ -1,15 +1,33 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { useSelector } from "react-redux";
+import { useAuth } from "@/layouts/Root";
 import ApperIcon from "@/components/ApperIcon";
 import Button from "@/components/atoms/Button";
+import Pipeline from "@/components/pages/Pipeline";
 import SearchBar from "@/components/molecules/SearchBar";
 
 const Header = ({ onMenuToggle, onQuickAdd }) => {
   const [searchValue, setSearchValue] = useState("");
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { user } = useSelector((state) => state.user);
+  const { logout } = useAuth();
 
   const handleSearch = (value) => {
     setSearchValue(value);
     // In a real app, this would trigger a global search
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setUserMenuOpen(false);
+  };
+
+  const getUserInitials = () => {
+    if (!user) return "U";
+    const firstName = user.firstName || user.first_name || "";
+    const lastName = user.lastName || user.last_name || "";
+    return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || "U";
   };
 
   return (
@@ -62,8 +80,35 @@ const Header = ({ onMenuToggle, onQuickAdd }) => {
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-error to-red-600 rounded-full"></span>
           </button>
 
-          <div className="w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-            <ApperIcon name="User" className="w-4 h-4 text-gray-600" />
+          <div className="relative">
+            <button 
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="w-8 h-8 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm hover:shadow-lg transition-all"
+            >
+              {getUserInitials()}
+            </button>
+            
+            {userMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                {user && (
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <div className="text-sm font-medium text-gray-900">
+                      {user.firstName} {user.lastName}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {user.emailAddress}
+                    </div>
+                  </div>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                >
+                  <ApperIcon name="LogOut" className="w-4 h-4" />
+                  <span>Sign out</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

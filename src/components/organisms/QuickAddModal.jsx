@@ -27,28 +27,34 @@ const QuickAddModal = ({ isOpen, onClose }) => {
     contactId: "",
   });
 
-  const handleContactSubmit = async (e) => {
+const handleContactSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      await contactService.create({
-        ...contactData,
-        createdAt: new Date().toISOString(),
-        lastContactDate: new Date().toISOString(),
+      const result = await contactService.create({
+        name_c: contactData.name,
+        email_c: contactData.email,
+        phone_c: contactData.phone,
+        company_c: contactData.company,
+        role_c: contactData.role,
+        created_at_c: new Date().toISOString(),
+        last_contact_date_c: new Date().toISOString(),
       });
       
-      toast.success("Contact added successfully!");
-      setContactData({
-        name: "",
-        email: "",
-        phone: "",
-        company: "",
-        role: "",
-      });
-      onClose();
+      if (result) {
+        toast.success("Contact added successfully!");
+        setContactData({
+          name: "",
+          email: "",
+          phone: "",
+          company: "",
+          role: "",
+        });
+        onClose();
+      }
     } catch (error) {
-      toast.error("Failed to add contact");
+      console.error("Error adding contact:", error);
     } finally {
       setLoading(false);
     }
@@ -59,26 +65,32 @@ const QuickAddModal = ({ isOpen, onClose }) => {
     setLoading(true);
     
     try {
-      await dealService.create({
-        ...dealData,
-        value: parseFloat(dealData.value) || 0,
-        probability: parseInt(dealData.probability) || 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+      const result = await dealService.create({
+        title_c: dealData.title,
+        value_c: parseFloat(dealData.value) || 0,
+        stage_c: dealData.stage,
+        probability_c: parseInt(dealData.probability) || 0,
+        expected_close_date_c: dealData.expectedCloseDate,
+        contact_id_c: parseInt(dealData.contactId) || 0,
+        contact_name_c: dealData.contactName || "",
+        created_at_c: new Date().toISOString(),
+        updated_at_c: new Date().toISOString(),
       });
       
-      toast.success("Deal added successfully!");
-      setDealData({
-        title: "",
-        value: "",
-        stage: "Lead",
-        probability: "20",
-        expectedCloseDate: "",
-        contactId: "",
-      });
-      onClose();
+      if (result) {
+        toast.success("Deal added successfully!");
+        setDealData({
+          title: "",
+          value: "",
+          stage: "Lead",
+          probability: "20",
+          expectedCloseDate: "",
+          contactId: "",
+        });
+        onClose();
+      }
     } catch (error) {
-      toast.error("Failed to add deal");
+      console.error("Error adding deal:", error);
     } finally {
       setLoading(false);
     }

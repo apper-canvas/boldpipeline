@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import ApperIcon from "@/components/ApperIcon";
-import MetricCard from "@/components/molecules/MetricCard";
-import DealCard from "@/components/molecules/DealCard";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
 import { dealService } from "@/services/api/dealService";
 import { contactService } from "@/services/api/contactService";
 import { activityService } from "@/services/api/activityService";
 import { format } from "date-fns";
+import ApperIcon from "@/components/ApperIcon";
+import Deals from "@/components/pages/Deals";
+import MetricCard from "@/components/molecules/MetricCard";
+import DealCard from "@/components/molecules/DealCard";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
 
 const Dashboard = () => {
   const [deals, setDeals] = useState([]);
@@ -52,9 +53,9 @@ const Dashboard = () => {
   };
 
   const calculateMetrics = () => {
-    const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0);
-    const activeDeals = deals.filter(deal => !["Closed Won", "Closed Lost"].includes(deal.stage));
-    const wonDeals = deals.filter(deal => deal.stage === "Closed Won");
+const totalValue = deals.reduce((sum, deal) => sum + (deal.value_c || 0), 0);
+    const activeDeals = deals.filter(deal => !["Closed Won", "Closed Lost"].includes(deal.stage_c));
+    const wonDeals = deals.filter(deal => deal.stage_c === "Closed Won");
     const conversionRate = deals.length > 0 ? Math.round((wonDeals.length / deals.length) * 100) : 0;
     
     return {
@@ -67,15 +68,15 @@ const Dashboard = () => {
   };
 
   const getRecentActivities = () => {
-    return activities
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .slice(0, 10);
+return activities
+      .sort((a, b) => new Date(b.timestamp_c) - new Date(a.timestamp_c))
+      .slice(0, 5);
   };
 
   const getTopDeals = () => {
     return deals
-      .filter(deal => !["Closed Won", "Closed Lost"].includes(deal.stage))
-      .sort((a, b) => b.value - a.value)
+      .filter(deal => !["Closed Won", "Closed Lost"].includes(deal.stage_c))
+      .sort((a, b) => (b.value_c || 0) - (a.value_c || 0))
       .slice(0, 6);
   };
 
@@ -211,22 +212,25 @@ const Dashboard = () => {
             {recentActivities.length > 0 ? (
               recentActivities.map((activity, index) => (
                 <motion.div
-                  key={activity.Id}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.05 }}
-                  className="p-4 flex items-start space-x-3"
+key={activity.Id}
+                  className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-150"
                 >
-                  <div className={`p-2 rounded-lg bg-gray-50 ${getActivityColor(activity.type)}`}>
-                    <ApperIcon name={getActivityIcon(activity.type)} className="w-4 h-4" />
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white shadow-sm">
+                      <div className="w-6 h-6 rounded-lg bg-gray-50 flex items-center justify-center">
+                        <div className={`p-2 rounded-lg bg-gray-50 ${getActivityColor(activity.type_c)}`}>
+                          <ApperIcon name={getActivityIcon(activity.type_c)} className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 font-medium">
-                      {activity.description}
-                    </p>
-                    <p className="text-xs text-secondary mt-1">
-                      {format(new Date(activity.timestamp), "MMM dd, h:mm a")}
-                    </p>
+                    <p className="text-sm text-gray-900 line-clamp-2">
+                      {activity.description_c}
+</p>
+                    <div className="text-xs text-secondary">
+                      {format(new Date(activity.timestamp_c), "MMM dd, h:mm a")}
+                    </div>
                   </div>
                 </motion.div>
               ))

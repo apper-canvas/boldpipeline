@@ -23,25 +23,25 @@ const ContactRow = ({ contact, onClick, index = 0 }) => {
     >
       <td className="px-6 py-4">
         <div className="flex items-center space-x-3">
-          <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center">
+<div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center">
             <span className="text-white font-semibold text-sm">
-              {contact.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+              {(contact.name_c || contact.Name || "U").split(" ").map(n => n[0]).join("").toUpperCase()}
             </span>
           </div>
           <div>
-            <div className="font-medium text-gray-900">{contact.name}</div>
-            <div className="text-sm text-secondary">{contact.email}</div>
+            <div className="font-medium text-gray-900">{contact.name_c || contact.Name}</div>
+            <div className="text-sm text-secondary">{contact.email_c}</div>
           </div>
         </div>
       </td>
       <td className="px-6 py-4">
-        <div className="text-sm text-gray-900">{contact.company}</div>
-        <div className="text-sm text-secondary">{contact.role}</div>
+        <div className="text-sm text-gray-900">{contact.company_c}</div>
+        <div className="text-sm text-secondary">{contact.role_c}</div>
       </td>
       <td className="px-6 py-4 text-sm text-gray-900">
-        <div className="flex items-center gap-1">
+<div className="flex items-center gap-1">
           <ApperIcon name="Phone" className="w-4 h-4 text-secondary" />
-          {contact.phone}
+          {contact.phone_c}
         </div>
       </td>
       <td className="px-6 py-4 text-sm font-semibold text-gray-900">
@@ -52,8 +52,8 @@ const ContactRow = ({ contact, onClick, index = 0 }) => {
           {contact.activeDeals} active
         </Badge>
       </td>
-      <td className="px-6 py-4 text-sm text-secondary">
-        {contact.lastContactDate ? format(new Date(contact.lastContactDate), "MMM dd, yyyy") : "Never"}
+<td className="px-6 py-4 text-sm text-secondary">
+        {contact.last_contact_date_c ? format(new Date(contact.last_contact_date_c), "MMM dd, yyyy") : "Never"}
       </td>
       <td className="px-6 py-4 text-right">
         <button className="text-secondary hover:text-gray-900 transition-colors">

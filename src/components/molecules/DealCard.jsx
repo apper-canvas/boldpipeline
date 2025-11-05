@@ -48,23 +48,23 @@ const DealCard = ({ deal, onClick, draggable = true, ...props }) => {
         className="p-4 space-y-3 cursor-pointer"
       >
         <div className="flex items-start justify-between">
-          <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2">
-            {deal.title}
+<h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2">
+            {deal.title_c || deal.Name}
           </h3>
-          <Badge variant={getStageVariant(deal.stage)} size="sm">
-            {deal.stage}
+          <Badge variant={getStageVariant(deal.stage_c || deal.stage)} size="sm">
+            {deal.stage_c || deal.stage}
           </Badge>
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-2xl font-bold gradient-text">
-              {formatCurrency(deal.value)}
+<span className="text-2xl font-bold gradient-text">
+              {formatCurrency(deal.value_c || deal.value || 0)}
             </span>
             <div className="flex items-center gap-1">
-              <ApperIcon name="Target" className={cn("w-3 h-3", getProbabilityColor(deal.probability))} />
-              <span className={cn("text-xs font-medium", getProbabilityColor(deal.probability))}>
-                {deal.probability}%
+              <ApperIcon name="Target" className={cn("w-3 h-3", getProbabilityColor(deal.probability_c || deal.probability || 0))} />
+              <span className={cn("text-xs font-medium", getProbabilityColor(deal.probability_c || deal.probability || 0))}>
+                {deal.probability_c || deal.probability || 0}%
               </span>
             </div>
           </div>
@@ -72,13 +72,13 @@ const DealCard = ({ deal, onClick, draggable = true, ...props }) => {
           <div className="w-full bg-gray-200 rounded-full h-2">
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: `${deal.probability}%` }}
+animate={{ width: `${deal.probability_c || deal.probability || 0}%` }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className={cn(
                 "h-2 rounded-full bg-gradient-to-r",
-                deal.probability >= 80 ? "from-success to-green-600" :
-                deal.probability >= 60 ? "from-warning to-amber-600" :
-                deal.probability >= 40 ? "from-amber-500 to-amber-600" :
+                (deal.probability_c || deal.probability || 0) >= 80 ? "from-success to-green-600" :
+                (deal.probability_c || deal.probability || 0) >= 60 ? "from-warning to-amber-600" :
+                (deal.probability_c || deal.probability || 0) >= 40 ? "from-amber-500 to-amber-600" :
                 "from-gray-400 to-gray-500"
               )}
             />
@@ -88,11 +88,11 @@ const DealCard = ({ deal, onClick, draggable = true, ...props }) => {
         <div className="flex items-center justify-between text-xs text-secondary">
           <div className="flex items-center gap-1">
             <ApperIcon name="User" className="w-3 h-3" />
-            <span className="truncate">{deal.contactName}</span>
+<span className="truncate">{deal.contact_name_c || deal.contactName}</span>
           </div>
           <div className="flex items-center gap-1">
             <ApperIcon name="Calendar" className="w-3 h-3" />
-            <span>{format(new Date(deal.expectedCloseDate), "MMM dd")}</span>
+            <span>{format(new Date(deal.expected_close_date_c || deal.expectedCloseDate || new Date()), "MMM dd")}</span>
           </div>
         </div>
       </Card>

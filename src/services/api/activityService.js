@@ -1,76 +1,281 @@
-import activitiesData from "@/services/mockData/activities.json";
+import { getApperClient } from "@/services/apperClient";
+import { toast } from "react-toastify";
 
 class ActivityService {
   constructor() {
-    this.activities = [...activitiesData];
+    this.tableName = 'activity_c';
   }
 
   async getAll() {
-    await this.delay(250);
-    return [...this.activities];
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const response = await apperClient.fetchRecords(this.tableName, {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "contact_id_c"}},
+          {"field": {"Name": "deal_id_c"}},
+          {"field": {"Name": "type_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "timestamp_c"}}
+        ]
+      });
+
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return [];
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching activities:", error?.response?.data?.message || error);
+      toast.error("Failed to load activities");
+      return [];
+    }
   }
 
   async getById(id) {
-    await this.delay(200);
-    const activity = this.activities.find(a => a.Id === parseInt(id));
-    if (!activity) {
-      throw new Error("Activity not found");
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const response = await apperClient.getRecordById(this.tableName, parseInt(id), {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "contact_id_c"}},
+          {"field": {"Name": "deal_id_c"}},
+          {"field": {"Name": "type_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "timestamp_c"}}
+        ]
+      });
+
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return null;
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching activity ${id}:`, error?.response?.data?.message || error);
+      toast.error("Failed to load activity");
+      return null;
     }
-    return { ...activity };
   }
 
   async getByContactId(contactId) {
-    await this.delay(300);
-    return this.activities.filter(a => a.contactId === contactId.toString());
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const response = await apperClient.fetchRecords(this.tableName, {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "contact_id_c"}},
+          {"field": {"Name": "deal_id_c"}},
+          {"field": {"Name": "type_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "timestamp_c"}}
+        ],
+        where: [{
+          FieldName: "contact_id_c",
+          Operator: "EqualTo",
+          Values: [parseInt(contactId)],
+          Include: true
+        }]
+      });
+
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return [];
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching activities by contact:", error?.response?.data?.message || error);
+      toast.error("Failed to load contact activities");
+      return [];
+    }
   }
 
   async getByDealId(dealId) {
-    await this.delay(300);
-    return this.activities.filter(a => a.dealId === dealId.toString());
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const response = await apperClient.fetchRecords(this.tableName, {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "contact_id_c"}},
+          {"field": {"Name": "deal_id_c"}},
+          {"field": {"Name": "type_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "timestamp_c"}}
+        ],
+        where: [{
+          FieldName: "deal_id_c",
+          Operator: "EqualTo",
+          Values: [parseInt(dealId)],
+          Include: true
+        }]
+      });
+
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return [];
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching activities by deal:", error?.response?.data?.message || error);
+      toast.error("Failed to load deal activities");
+      return [];
+    }
   }
 
   async create(activityData) {
-    await this.delay(400);
-    const maxId = this.activities.length > 0 
-      ? Math.max(...this.activities.map(a => a.Id))
-      : 0;
-    
-    const newActivity = {
-      ...activityData,
-      Id: maxId + 1,
-    };
-    
-    this.activities.push(newActivity);
-    return { ...newActivity };
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const records = [{
+        Name: activityData.description || activityData.description_c,
+        contact_id_c: parseInt(activityData.contactId || activityData.contact_id_c || 0),
+        deal_id_c: parseInt(activityData.dealId || activityData.deal_id_c || 0),
+        type_c: activityData.type || activityData.type_c,
+        description_c: activityData.description || activityData.description_c,
+        timestamp_c: activityData.timestamp || activityData.timestamp_c || new Date().toISOString()
+      }];
+
+      const response = await apperClient.createRecord(this.tableName, { records });
+
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return null;
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to create ${failed.length} activities:`, failed);
+          failed.forEach(record => {
+            if (record.message) toast.error(record.message);
+          });
+        }
+        return successful.length > 0 ? successful[0].data : null;
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Error creating activity:", error?.response?.data?.message || error);
+      toast.error("Failed to create activity");
+      return null;
+    }
   }
 
   async update(id, activityData) {
-    await this.delay(300);
-    const index = this.activities.findIndex(a => a.Id === parseInt(id));
-    
-    if (index === -1) {
-      throw new Error("Activity not found");
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const records = [{
+        Id: parseInt(id),
+        Name: activityData.description || activityData.description_c,
+        contact_id_c: parseInt(activityData.contactId || activityData.contact_id_c || 0),
+        deal_id_c: parseInt(activityData.dealId || activityData.deal_id_c || 0),
+        type_c: activityData.type || activityData.type_c,
+        description_c: activityData.description || activityData.description_c,
+        timestamp_c: activityData.timestamp || activityData.timestamp_c
+      }];
+
+      const response = await apperClient.updateRecord(this.tableName, { records });
+
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return null;
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to update ${failed.length} activities:`, failed);
+          failed.forEach(record => {
+            if (record.message) toast.error(record.message);
+          });
+        }
+        return successful.length > 0 ? successful[0].data : null;
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Error updating activity:", error?.response?.data?.message || error);
+      toast.error("Failed to update activity");
+      return null;
     }
-    
-    this.activities[index] = { ...this.activities[index], ...activityData };
-    return { ...this.activities[index] };
   }
 
   async delete(id) {
-    await this.delay(250);
-    const index = this.activities.findIndex(a => a.Id === parseInt(id));
-    
-    if (index === -1) {
-      throw new Error("Activity not found");
-    }
-    
-    this.activities.splice(index, 1);
-    return true;
-  }
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
 
-  delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+      const response = await apperClient.deleteRecord(this.tableName, { 
+        RecordIds: [parseInt(id)]
+      });
+
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return false;
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to delete ${failed.length} activities:`, failed);
+          failed.forEach(record => {
+            if (record.message) toast.error(record.message);
+          });
+        }
+        return successful.length > 0;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error deleting activity:", error?.response?.data?.message || error);
+      toast.error("Failed to delete activity");
+      return false;
+    }
   }
 }
+
+export const activityService = new ActivityService();
 
 export const activityService = new ActivityService();

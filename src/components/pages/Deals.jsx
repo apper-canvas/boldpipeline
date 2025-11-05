@@ -52,7 +52,7 @@ const Deals = () => {
   };
 
   const getContactName = (contactId) => {
-    const contact = contacts.find(c => c.Id === contactId);
+const contact = contacts.find(c => c.Id === parseInt(contactId));
     return contact ? contact.name : "Unknown Contact";
   };
 
@@ -75,11 +75,11 @@ const Deals = () => {
     
     if (searchTerm) {
       filtered = filtered.filter(deal =>
-        deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        getContactName(deal.contactId).toLowerCase().includes(searchTerm.toLowerCase())
+(deal.title_c || deal.Name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        getContactName(deal.contact_id_c).toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     if (filterStage !== "all") {
       filtered = filtered.filter(deal => deal.stage === filterStage);
     }
@@ -88,7 +88,19 @@ const Deals = () => {
       let aValue = a[sortBy];
       let bValue = b[sortBy];
       
-      if (sortBy === "expectedCloseDate") {
+if (sortBy === "expectedCloseDate") {
+        aValue = new Date(a.expected_close_date_c || a.expectedCloseDate);
+        bValue = new Date(b.expected_close_date_c || b.expectedCloseDate);
+      } else if (sortBy === "value") {
+        aValue = a.value_c || a.value || 0;
+        bValue = b.value_c || b.value || 0;
+      } else if (sortBy === "title") {
+        aValue = a.title_c || a.Name || "";
+        bValue = b.title_c || b.Name || "";
+      } else if (sortBy === "stage") {
+        aValue = a.stage_c || a.stage || "";
+        bValue = b.stage_c || b.stage || "";
+      } else {
         aValue = new Date(aValue);
         bValue = new Date(bValue);
       }
@@ -245,38 +257,38 @@ const Deals = () => {
                   >
                     <td className="px-6 py-4">
                       <div>
-                        <div className="font-medium text-gray-900">{deal.title}</div>
+<div className="font-medium text-gray-900">{deal.title_c || deal.Name}</div>
                         <div className="text-sm text-secondary">
-                          Created {format(new Date(deal.createdAt), "MMM dd, yyyy")}
+                          Created {format(new Date(deal.created_at_c || deal.createdAt || new Date()), "MMM dd, yyyy")}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <Badge variant={getStageVariant(deal.stage)} size="sm">
+<Badge variant={getStageVariant(deal.stage_c || deal.stage)} size="sm">
                         {deal.stage}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                      {formatCurrency(deal.value)}
+{formatCurrency(deal.value_c || deal.value || 0)}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <div className="w-full bg-gray-200 rounded-full h-2 max-w-[80px]">
                           <div
                             className="h-2 rounded-full bg-gradient-to-r from-primary to-blue-600"
-                            style={{ width: `${deal.probability}%` }}
+style={{ width: `${deal.probability_c || deal.probability || 0}%` }}
                           />
                         </div>
-                        <span className="text-sm font-medium text-gray-600 min-w-[40px]">
-                          {deal.probability}%
+                        <span className="text-xs font-medium text-secondary ml-2">
+                          {deal.probability_c || deal.probability || 0}%
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
-                      {getContactName(deal.contactId)}
+{getContactName(deal.contact_id_c)}
                     </td>
                     <td className="px-6 py-4 text-sm text-secondary">
-                      {format(new Date(deal.expectedCloseDate), "MMM dd, yyyy")}
+{format(new Date(deal.expected_close_date_c || deal.expectedCloseDate || new Date()), "MMM dd, yyyy")}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button className="text-secondary hover:text-gray-900 transition-colors">
@@ -304,7 +316,7 @@ const Deals = () => {
         <div className="flex items-center justify-between text-sm text-secondary">
           <p>Showing {displayDeals.length} of {deals.length} deals</p>
           <p>
-            Total value: {formatCurrency(displayDeals.reduce((sum, deal) => sum + deal.value, 0))}
+Total value: {formatCurrency(displayDeals.reduce((sum, deal) => sum + (deal.value_c || deal.value || 0), 0))}
           </p>
         </div>
       )}
